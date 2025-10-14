@@ -41,11 +41,15 @@ class GraphConfig(BaseSettings):
     graph_database_username: str = ""
     graph_database_password: str = ""
     graph_database_port: int = 123
+    graph_database_endpoint: str = "http://localhost:7200"
+    graph_database_repository: str = "test"
     graph_file_path: str = ""
     graph_filename: str = ""
     graph_model: object = KnowledgeGraph
     graph_topology: object = KnowledgeGraph
-    model_config = SettingsConfigDict(env_file=".env", extra="allow", populate_by_name=True)
+    model_config = SettingsConfigDict(
+        env_file=".env", extra="allow", populate_by_name=True
+    )
 
     # Model validator updates graph_filename and path dynamically after class creation based on current database provider
     # If no specific graph_filename or path are provided
@@ -53,6 +57,9 @@ class GraphConfig(BaseSettings):
     def fill_derived(self):
         provider = self.graph_database_provider.lower()
         base_config = get_base_config()
+
+        if provider == "ontotext":
+            return self
 
         # Set default filename if no filename is provided
         if not self.graph_filename:
@@ -66,8 +73,12 @@ class GraphConfig(BaseSettings):
             )
         else:
             # Default path
-            databases_directory_path = os.path.join(base_config.system_root_directory, "databases")
-            self.graph_file_path = os.path.join(databases_directory_path, self.graph_filename)
+            databases_directory_path = os.path.join(
+                base_config.system_root_directory, "databases"
+            )
+            self.graph_file_path = os.path.join(
+                databases_directory_path, self.graph_filename
+            )
 
         return self
 
@@ -90,6 +101,8 @@ class GraphConfig(BaseSettings):
             "graph_database_username": self.graph_database_username,
             "graph_database_password": self.graph_database_password,
             "graph_database_port": self.graph_database_port,
+            "graph_database_endpoint": self.graph_database_endpoint,
+            "graph_database_repository": self.graph_database_repository,
             "graph_file_path": self.graph_file_path,
             "graph_model": self.graph_model,
             "graph_topology": self.graph_topology,
@@ -116,6 +129,8 @@ class GraphConfig(BaseSettings):
             "graph_database_username": self.graph_database_username,
             "graph_database_password": self.graph_database_password,
             "graph_database_port": self.graph_database_port,
+            "graph_database_endpoint": self.graph_database_endpoint,
+            "graph_database_repository": self.graph_database_repository,
             "graph_file_path": self.graph_file_path,
         }
 

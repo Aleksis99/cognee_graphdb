@@ -33,6 +33,8 @@ def create_graph_engine(
     graph_database_username="",
     graph_database_password="",
     graph_database_port="",
+    graph_database_endpoint="",
+    graph_database_repository="",
 ):
     """
     Create a graph engine based on the specified provider type.
@@ -160,7 +162,20 @@ def create_graph_engine(
             graph_id=graph_identifier,
         )
 
+    elif graph_database_provider == "ontotext":
+        if not graph_database_endpoint or not graph_database_repository:
+            raise EnvironmentError("Missing required Ontotext GraphDB endpoint or repository.")
+
+        from .ontotext.get_ontotext_graph_db import OntotextGraphDB
+
+        return OntotextGraphDB(
+            endpoint=graph_database_endpoint,
+            repository=graph_database_repository,
+            username=graph_database_username,
+            password=graph_database_password,
+        )
+
     raise EnvironmentError(
         f"Unsupported graph database provider: {graph_database_provider}. "
-        f"Supported providers are: {', '.join(list(supported_databases.keys()) + ['neo4j', 'kuzu', 'kuzu-remote', 'memgraph', 'neptune', 'neptune_analytics'])}"
+        f"Supported providers are: {', '.join(list(supported_databases.keys()) + ['neo4j', 'kuzu', 'kuzu-remote', 'memgraph', 'neptune', 'neptune_analytics', 'ontotext'])}"
     )
